@@ -170,7 +170,7 @@
 <body>
 
 <header>
-  <h1>🕵 Доска расследования <span class="badge">РЕВИЗИЯ v2 · 27.06.26</span></h1>
+  <h1>🕵 Доска расследования <span class="badge">РЕВИЗИЯ v4 · 27.06.26</span></h1>
   <span class="sub">только проверяемые факты · с источниками</span>
   <div class="legend">
     <div class="li"><span class="dotc" style="background:#3ddc97"></span>Высокая</div>
@@ -217,22 +217,23 @@ const ZONES=[
 
 /* ============ NODES ============ */
 const N={
-  magzhan:{t:'p',conf:'md',name:'Магжан Аманжан',hd:'@magzhanchick',ph:'М',rot:-2,x:430,y:520,
-    role:'Основатель Academix Hub · alumnus ISSAI SRP 2025',
-    stamp:['ok','ОСНОВАТЕЛЬ'],
+  magzhan:{t:'p',conf:'md',name:'Магжан Аманжан',hd:'@magzhanchick · mgzh',ph:'М',rot:-2,x:430,y:520,
+    role:'Founder of Academix Hub + Midas Clothes + Prepify · alumnus ISSAI SRP 2025',
+    stamp:['ok','×3 ПРОЕКТА'],
     facts:[
+      ['ok','Подтверждено (соцсеть)','В шапке Instagram @magzhanchick прямым текстом: «founder of @academixhubglobal @midas.clothes1 @prepify.prep». Снимает прежний вердикт «не подтверждено» — он сам заявляет себя фаундером всех трёх.','скриншот профиля IG','instagram.com/magzhanchick'],
       ['ok','Подтверждено','Сооснователь Academix Hub. ISSAI Назарбаев Университета независимо называет его основателем и alumnus SRP 2025.','ISSAI NU · The Steppe','issai.nu.edu.kz/2026/01/26/...'],
-      ['self','Частично','Маппинг ника @magzhanchick → «Магжан Аманжан» подтверждается косвенно (имя в СМИ), напрямую через аккаунт не верифицирован.','—','']
+      ['self','Внимание','Midas Clothes и Prepify заявлены в био, НО оба сайта мёртвые/заглушки. Т.е. «фаундер трёх проектов», два из которых не работают — ровно тот разрыв, что ты искал.','скриншот + проверка сайтов','']
     ],
-    note:'Один из двух «центральных» героев, с которых ты начинал. Связь с Midas/Prepify — НЕ подтверждена, удалена.'},
+    note:'Один из двух «центральных» героев. ТЕПЕРЬ ПОДТВЕРЖДЕНО: он сам в Instagram-био указывает себя фаундером Academix + Midas + Prepify. Ник на аккаунте — mgzh, 7 публикаций, 1347 подписчиков.'},
 
-  almyrza:{t:'p',conf:'md',name:'Алмырза Мухамеджанов',hd:'@mrzaaaw',ph:'А',rot:2,x:430,y:700,
-    role:'Сооснователь Academix Hub',
+  almyrza:{t:'p',conf:'md',name:'Алмырза Мухамеджанов',hd:'@mrzaaaw · mrzaaa',ph:'А',rot:2,x:430,y:700,
+    role:'Founder & CEO of Academix Hub · AGIS \u201926',
     facts:[
-      ['ok','Подтверждено','The Steppe прямо: «основатели Academix Hub, Магжан Аманжан и Альмырза Мухамеджанов».','The Steppe','the-steppe.com/steppe-youth/...'],
-      ['self','Частично','Маппинг ника @mrzaaaw → личность напрямую не подтверждён (Низкая).','—','']
+      ['ok','Подтверждено (соцсеть)','Шапка Instagram @mrzaaaw: «Founder and CEO of @academixhubglobal», подпись «AGIS \u201926». Привязан ТОЛЬКО к Academix — НЕ к Midas/Prepify.','скриншот профиля IG','instagram.com/mrzaaaw'],
+      ['ok','Подтверждено','The Steppe прямо: «основатели Academix Hub, Магжан Аманжан и Альмырза Мухамеджанов».','The Steppe','the-steppe.com/steppe-youth/...']
     ],
-    note:'Привязка к Midas Clothes и Prepify из прошлой версии — УДАЛЕНА (нет доказательств).'},
+    note:'Важный нюанс: в отличие от Магжана, Алмырза в своём био указывает фаундерство ТОЛЬКО Academix Hub. Midas и Prepify он на себя не вешает. 4 публикации, 919 подписчиков.'},
 
   academix:{t:'proj',conf:'md',name:'Academix Hub',hd:'academixhub.co',ph:'A',rot:-1,x:660,y:610,
     role:'«Экосистема» для школьников: олимпиады, конкурсы, IRC, GenerativeX',
@@ -244,23 +245,26 @@ const N={
     ],
     note:'В жюри IRC заявлена Камила (NeuHarmony) — это и есть мостик между двумя кластерами, но независимо не подтверждён.'},
 
-  kamila:{t:'p',conf:'hi',name:'Камиля Мухаметкалиева',hd:'@kamilyamukh',ph:'К',rot:1,x:980,y:330,
+  kamila:{t:'p',conf:'hi',name:'Камиля Мухаметкалиева',hd:'@kamilyamukh · «In stealth»',ph:'К',rot:1,x:980,y:330,
     role:'Larp Factory (Reko AI) · основатель NeuHarmony',
     stamp:['ok','$10k ✓'],
     facts:[
       ['ok','Подтверждено','Команда Larp Factory выиграла Alem Plus Hackathon 2026 с Reko AI — $10 000. Подтверждает САМ Astana Hub.','Astana Hub','astanahub.com/ru/article/ai-startapy-...'],
-      ['self','Со слов','NeuHarmony: ~$1,5 тыс. «на идею», статья в Curieux, партнёрства Ayala/Мейирим, результаты «к 4-й сессии».','er10.kz','er10.kz/.../neuharmony-...'],
-      ['media','Реклама','Интервью ER10 о NeuHarmony помечено «На правах рекламы». Статья digitalbusiness.kz 22.12.25 — рубрика «Личный опыт».','er10.kz · digitalbusiness.kz','']
+      ['dead','TEDx НЕ состоялся','Анонсирована спикером TEDxAlmaty Youth 2025 (06.12.25, «Батыл бол») как «инноватор в нейротехнологиях». НО ивент перенесли «по ряду обстоятельств», и опубликованного TEDx-доклада (видео на TEDx Talks / ted.com) у неё НЕТ. «Спикер перенесённого ивента» ≠ состоявшееся выступление.','скриншоты TEDxAlmaty','youtube.com/tedx'],
+      ['self','Объясняет пробел','Шапка IG: «In stealth». Проект намеренно скрыт — это объясняет, почему её клиента и продукт невозможно найти (ты сам это заметил).','скриншот профиля IG','instagram.com/kamilyamukh'],
+      ['media','Реклама','NeuHarmony: ~$1,5 тыс. «на идею», статья в Curieux, партнёрства Ayala/Мейирим. Интервью ER10 помечено «На правах рекламы»; статья DB 22.12.25 — «Личный опыт».','er10.kz · digitalbusiness.kz','er10.kz/.../neuharmony-...']
     ],
-    note:'Сильнейший ПОДТВЕРЖДЁННЫЙ факт всей сети — это её победа на хакатоне. NeuHarmony держится на PR.'},
+    note:'Победа на хакатоне — реальна. Но «TEDx-спикер» и «In stealth» вместе показывают паттерн: статусные строчки в био при невозможности проверить результат. 5 публикаций, 698 подписчиков.'},
 
-  reko:{t:'proj',conf:'hi',name:'Reko AI',hd:'команда Larp Factory',ph:'R',rot:-2,x:1230,y:300,
-    role:'AI-формирование ЭСФ из выписок и PDF',
+  reko:{t:'proj',conf:'hi',name:'Reko AI',hd:'reko.ai · команда Larp Factory',ph:'R',rot:-2,x:1230,y:300,
+    role:'AI-сверка ЭСФ · подключение к Halyk Business и Kaspi Business Pay',
     stamp:['ok','ПРИЗ ✓'],
     facts:[
-      ['ok','Подтверждено','Победа на Alem Plus Hackathon 2026 (финал 22.05.2026, alem.ai; пул «до $18 000»; орг. Astana Hub + Фонд цифр. инициатив ЕАБР).','Astana Hub · kaktus.media','astanahub.com'],
-      ['self','Со слов','Первый платящий клиент — Grand Balance, 29 900 ₸/мес; закрытая бета. Это самоотчёт команды.','digitalbusiness.kz','digitalbusiness.kz/2026-05-27/...']
-    ]},
+      ['ok','Подтверждено','Победа на Alem Plus Hackathon 2026 (100 команд ЦА; финал 22.05.2026 на alem.ai; пул $18 000, главный приз $10 000; орг. Astana Hub + Фонд цифр. инициатив ЕАБР). Дословно с Astana Hub.','Astana Hub','astanahub.com/.../alem-plus-hackathon-2026'],
+      ['dead','НЕ подтверждено','«Первый платящий клиент — Grand Balance, 29 900 ₸/мес» — только слова команды в DB. В реестрах (adata, statsnet, kompra) БИН/владельца этой фирмы НЕ найдено. Есть бухгалтерская «ГрандБаланс ИП» в Алматы, но её связь с Reko AI ничем не подтверждена.','digitalbusiness.kz · реестры','grandbalance.kz'],
+      ['self','Со слов','«Тестируется с несколькими компаниями в закрытом режиме», «команда в поисках бизнес-ангелов». Закрытость = почему продукт/клиента нельзя проверить.','digitalbusiness.kz','digitalbusiness.kz/2026-05-27/...']
+    ],
+    note:'Состав: Камиля (руководство+продажи+QA), Милан Гориславец (фронтенд), Султан Карилов (бэкенд+ML, участвовал ДИСТАНЦИОННО). Победа реальна, но единственный «клиент» не верифицируется.'},
 
   neuharmony:{t:'proj',conf:'md',name:'NeuHarmony',hd:'муз. терапия · РАС',ph:'N',rot:2,x:1230,y:450,
     role:'Закрытая B2B-платформа музыкотерапии для соццентров',
@@ -270,15 +274,16 @@ const N={
       ['self','Со слов','Пилот в центрах Ayala и Мейирим, диагностика + 6-недельный план — самоотчёт.','digitalbusiness.kz','']
     ]},
 
-  igor:{t:'p',conf:'hi',name:'Игорь Мартынюк «Blink»',hd:'@igor_blinkk',ph:'И',rot:-2,x:680,y:80,
-    role:'Основатель TabAI · победитель nFactorial 2025 · амбассадор Cursor',
-    stamp:['ok','nFactorial ✓'],
+  igor:{t:'p',conf:'hi',name:'Игорь Мартынюк «Blink»',hd:'@igor_blinkk · glourfish ✓',ph:'И',rot:-2,x:680,y:80,
+    role:'17 y.o founder TabAI · nFactorial 2025 · @trycursor ambassador',
+    stamp:['q','$35K vs $300K'],
     facts:[
-      ['ok','Подтверждено','TabAI существует; победа nFactorial; официальный амбассадор Cursor (заметили в X). Грант Google Gemini $25 тыс. (его слова).','digitalbusiness.kz','digitalbusiness.kz/2026-06-07/...'],
-      ['dead','Расхождение','«Около 20 тыс. пользователей» (пресс-релиз Минпросвещения РК) против Chrome Web Store: 3 000 пользователей, 4.75 (75 оценок).','chrome-stats.com','chrome-stats.com/d/fiogaki...'],
-      ['dead','Расхождение','Проверяемая сумма привлечённого — $35 000 (в т.ч. $30k от Базылбекова), а НЕ «$300k».','digitalbusiness.kz','digitalbusiness.kz/2026-06-07/...']
+      ['ok','Подтверждено','TabAI существует; победа nFactorial; верифицированный аккаунт IG (галочка); официальный амбассадор Cursor ($29 млрд); грант Google; YC Startup School (полный грант, исключение по возрасту).','digitalbusiness.kz · osn.kz','digitalbusiness.kz/2026-06-07/...'],
+      ['dead','РАЗГАДКА цифр','Апрель 2026: везде «$35 тыс. ангельских» (Минпросвещения, Kursiv, nFactorial). Май 2026: вдруг «$300 тыс.». По самому DB: «$250 тыс. как участник акселерационного трека FIR U» + a16z Scout + ангелы = $300K. Т.е. $300K ≠ инвестчек, а в основном место в акселераторе.','digitalbusiness.kz 12.05 vs 07.06','digitalbusiness.kz/2026-05-12/...'],
+      ['dead','Расхождение','«~20 тыс. пользователей» (Минпросвещения, его сайт igorblink.xyz) против Chrome Web Store: 3 000 пользователей, 4.75 (75 оценок). Разрыв ~7x.','chrome-stats.com','chrome-stats.com/d/fiogaki...'],
+      ['self','Со слов','MRR ~$3 тыс.; «первые корпоративные клиенты»; BirdTON «12M+ users»; Traffy «$300k GMV» (это оборот рекламы, не его выручка).','digitalbusiness.kz · igorblink.xyz','']
     ],
-    note:'Кейс реальный, но цифры завышены. BirdTON «12M+ users» — самоотчёт. Privacy policy у TabAI есть.'},
+    note:'Кейс реальный и сильный, но цифры подаются раздуто. Главный разрыв: «привлёк $300K» на деле = $35K ангелов (апрель) + $250K акселератор FIR U + Scout-чек (май). Одна история, цифры разнятся в ~10 раз в зависимости от месяца. Подписан на 23_gleb_.'},
 
   tabai:{t:'proj',conf:'hi',name:'TabAI',hd:'tabai.dev · @tabaiapp',ph:'T',rot:1,x:680,y:-30,
     role:'AI task-manager · расширение Chrome',
@@ -309,7 +314,7 @@ const N={
     role:'Главный «движок» освещения сети',
     stamp:['q','PRICE'],
     facts:[
-      ['media','Прайс (дословно)','«500 000 KZT — за публикацию без пометки «Партнерский материал»… закрепление на главном экране 3 дня». +60 000 ₸ — Instagram и Telegram. 450 000 ₸ — с пометкой «Партнерский материал».','digitalbusiness.kz','digitalbusiness.kz/stoimost-integraczij/'],
+      ['media','Прайс (дословно)','Сайт: «500 000 ₸ — за публикацию без пометки «Партнерский материал»». Instagram-прайс (скриншот): «650 000 ₸ — готовый пост, 725 000 ₸ — разработка+пост, 840 000 ₸ — Reels». Контакт ads@digitalbusiness.kz.','digitalbusiness.kz · скриншот IG','digitalbusiness.kz/stoimost-integraczij/'],
       ['ok','Юрлицо','ТОО «Digital Business Media», БИН 220540023091, Алматы, Байзакова 280.','реестр','digitalbusiness.kz/o-proekte/'],
       ['dead','Недостаточно данных','Имя «Виталий Волянюк» как CEO на странице /o-proekte напрямую не зафиксировано в этой проверке.','—','']
     ],
@@ -324,14 +329,14 @@ const N={
     ]},
 
   tair:{t:'p',conf:'md',name:'Таир Калдыбаев',hd:'@tairqaldy · @qaldy_ai',ph:'Т',rot:1,x:300,y:870,
-    role:'Самоназвание «Software Engineer & AI Expert» · Quantum STEM School',
-    stamp:['q','НЕТ СВЯЗЕЙ'],
+    role:'«Software Engineer & AI Expert» · «Expert in Automation»',
+    stamp:['q','СЛАБАЯ СВЯЗЬ'],
     facts:[
-      ['dead','Не подтверждено','НИ ОДНОЙ подтверждённой связи с другими лицами сети не найдено. В материалах Academix/Investly/Eurasian не упоминается.','целевой поиск','—'],
+      ['self','НОВОЕ: связь есть','На совместном фото — Таир (бейдж «Expert in Automation») рядом с @g.mubaa (тот же бейдж) и взрослым мужчиной в очках на каком-то мероприятии/программе. Тот же мужчина появляется и на фото с Игорем/окружением Cursor. Значит, Таир пересекается с тусовкой на ивентах.','скриншот совместного фото IG','instagram.com'],
       ['ok','Подтверждено','Qaldy AI — реальное ТОО (БИН 241140033566, рег. 26.11.2024, Астана). Руководитель — Тимур Калдыбаев (семейный бизнес, настольная игра «ВЛАСТЬ»).','реестр ba.prg.kz','ba.prg.kz'],
       ['dead','Не найдено','Живого продукта Qaldy AI / сайта / privacy policy НЕТ. Профиль на Astana Hub пустой. Обучение в Fontys — только мета-тег, не подтверждено.','Казправда','kazpravda.kz/n/shkolnik-...']
     ],
-    note:'Новый фигурант. По итогам проверки — отдельно стоящий, в сеть не входит. Edom.kz (ЖКХ) — призёр городской олимпиады, продукт «в разработке».'},
+    note:'Раньше был «вне сети». Теперь по фото — слабая, но реальная связь: общий ивент с окружением сети («Expert in Automation» бейджи). Прямых деловых связей по-прежнему не найдено. Edom.kz (ЖКХ) — призёр городской олимпиады, «в разработке».'},
 
   harmonic:{t:'proj',conf:'hi',name:'harmonic.ai',hd:'ЛОЖНОЕ СОВПАДЕНИЕ',ph:'H',rot:-3,x:300,y:230,
     role:'Venture-data компания (SF/NYC) — НЕ часть сети',
@@ -346,7 +351,37 @@ const N={
     stamp:['q','ПУСТО'],
     facts:[
       ['dead','Недостаточно данных','Прямой доступ не удался. По характеру доменов lovable.app — заброшенный прототип. Связь с сетью не подтверждена.','—','']
-    ]}
+    ]},
+
+  midas:{t:'proj',conf:'md',name:'Midas Clothes',hd:'@midas.clothes1 · midasclothing.shop',ph:'$',rot:-2,x:160,y:480,
+    role:'Бренд одежды — заявлен Магжаном как его проект',
+    stamp:['dead','МЁРТВЫЙ САЙТ'],
+    facts:[
+      ['ok','Связь ПОДТВЕРЖДЕНА','Магжан в био Instagram прямо указывает «founder of … @midas.clothes1». Раньше связь была «не подтверждена» — теперь подтверждена самим фаундером.','скриншот IG @magzhanchick','instagram.com/magzhanchick'],
+      ['dead','Сайт','midasclothing.shop — нулевой след в поиске, не открывается. Нет privacy policy / terms / регистрации. По сути мёртвый/незапущенный магазин.','проверка домена','']
+    ],
+    note:'Один из «трёх проектов» Магжана. Связь теперь железная (его собственное био), но сам продукт не работает — что и было твоей исходной гипотезой.'},
+
+  prepify:{t:'proj',conf:'hi',name:'Prepify',hd:'tryprepify.vercel.app · @prepify.prep',ph:'P',rot:2,x:160,y:660,
+    role:'Подготовка к экзамену CSCA (для поступления в вузы Китая) — проект Магжана',
+    stamp:['dead','PRIVACY = «#»'],
+    facts:[
+      ['ok','Связь ПОДТВЕРЖДЕНА','Магжан в био Instagram: «founder of … @prepify.prep».','скриншот IG @magzhanchick','instagram.com/magzhanchick'],
+      ['dead','Тест футера (вживую)','Privacy Policy → «#» (НЕ работает). Terms of Service → «#» (НЕ работает). About, Contact, Blog, Community, Support, Twitter/LinkedIn/GitHub → все «#». Practice Tests (/tests) и Study Materials (/materials) → 404. Работают только якоря Features/Pricing/FAQ.','прямой осмотр tryprepify.vercel.app','tryprepify.vercel.app'],
+      ['dead','Лживые цифры','«Verified across 12,847 students», «94% Pass Rate» — но счётчики тут же показывают «0+» (Students Prepared 0+, Practice Questions 0+). Отзывы — сгенерированные аватары. Реального входа/оплаты нет. Контакт support@prepify.com, «Remote — Global».','прямой осмотр','tryprepify.vercel.app'],
+      ['ok','Не путать','prepify.studio (студенты Purdue) и US «Prepify» (закрыт) — ДРУГИЕ проекты.','—','']
+    ],
+    note:'НОВЫЙ сайт (vercel) красивее старой WordPress-заглушки, но это по-прежнему пустой лендинг: ключевые юр-страницы Privacy/Terms ведут в «#», внутренние страницы 404. Именно отсутствие рабочего privacy policy — серьёзный красный флаг, ты был прав.'},
+
+  grandbalance:{t:'proj',conf:'lo',name:'Grand Balance',hd:'заявленный клиент Reko AI',ph:'?',rot:-3,x:1460,y:230,
+    role:'«Первый платящий клиент» Reko AI (29 900 ₸/мес) — НЕ верифицирован',
+    stamp:['q','НЕ НАЙДЕН'],
+    facts:[
+      ['dead','Не подтверждено','В реестрах (adata, statsnet, kompra, ba.prg) нет БИН/владельца фирмы с таким названием, привязанной к Reko AI. Заявление есть только в одной статье DB.','реестры','—'],
+      ['self','Что есть','Существует бухгалтерская «ГрандБаланс ИП» в Алматы (grandbalance.kz, ул. Герцена 161). Но связь с Reko AI ничем не доказана — совпадение по названию. На сайте: копирайт «2024» при «основании в 2012», разные телефоны, Gmail с опечаткой.','grandbalance.kz','grandbalance.kz/o-kompanii'],
+      ['dead','Внимание','«Grand/Гранд» — родовое название, в Алматы десятки несвязанных компаний. Идентификация именно как клиента Reko AI невозможна.','—','']
+    ],
+    note:'Ты был прав, что не смог его найти. Реальный единственный «клиент» главного подтверждённого проекта сети — не верифицируется. Это ядро гипотезы «пузыря».'}
 };
 
 /* ============ EDGES ============ */
@@ -367,8 +402,12 @@ const E=[
   ['kamila','digbiz','освещение (личный опыт)','media','hi'],
   ['neuharmony','digbiz','PR-материал','media','hi'],
   ['anuar','digbiz','освещение','media','hi'],
-  ['igor','digbiz','освещение','media','hi'],
-  ['academix','digbiz','освещение','media','md']
+  ['academix','digbiz','освещение','media','md'],
+  ['magzhan','midas','founder (по био IG) · сайт мёртв','dashed','md'],
+  ['magzhan','prepify','founder (по био IG) · сайт-заглушка','dashed','md'],
+  ['tair','eurasian','общий ивент (фото, бейджи Expert in Automation)','dashed','lo'],
+  ['igor','digbiz','«$300K» (май) vs «$35K» (апрель)','media','hi'],
+  ['reko','grandbalance','«клиент» — НЕ подтверждён','dashed','lo']
 ];
 
 /* ============ RENDER ============ */
@@ -507,9 +546,12 @@ const TL=[
   ['19.08.25','ER10: NeuHarmony (реклама)','m'],
   ['29.08.25','Investly→Eurasian $50k','v'],
   ['22.12.25','digbiz: Камила','m'],
+  ['06.12.25','TEDx Youth: анонс Камили → перенесён','m'],
   ['26.01.26','GenerativeX (ISSAI×Academix)','v'],
+  ['02.04.26','TabAI: «$35K» (Минпросвещения)','m'],
+  ['12.05.26','TabAI: «$300K» (DB) ⚠ та же история','m'],
   ['22.05.26','Alem Plus: Reko AI $10k','v'],
-  ['07.06.26','Мартынюк: $35k, Cursor','v'],
+  ['07.06.26','Мартынюк: Cursor ambassador','v'],
   ['14.06.26','TabAI обновлён','s']
 ];
 const tl=document.getElementById('tl');
