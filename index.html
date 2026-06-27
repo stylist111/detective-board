@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detective Board · Ревизия v2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root{
+    --felt:#1a1410;          /* корковая доска / тёмный фон */
+    --felt2:#221a13;
+    --ink:#f0ebe2;
+    --dim:#a99e8c;
+    --thread:#c0392b;        /* красная нить */
+    --thread2:#7a8a52;       /* зелёная нить — подтверждено */
+    --paper:#f4efe3;         /* стикер-бумага */
+    --paper2:#efe6d2;
+    --paperblue:#d9e6ee;
+    --pin:#d4b483;
+    --hi:#3ddc97; --md:#f5b945; --lo:#ff6b6b;
+    --media:#b794f6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;background:var(--felt)}
+
+  /* cork / felt texture */
+  #stage{
+    position:absolute;inset:0;cursor:grab;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(120,90,50,.10), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(90,70,40,.12), transparent 45%),
+      repeating-linear-gradient(45deg, rgba(0,0,0,.015) 0 2px, transparent 2px 4px),
+      var(--felt);
+  }
+  #stage.panning{cursor:grabbing}
+  #world{position:absolute;top:0;left:0;transform-origin:0 0}
+  svg.threads{position:absolute;top:0;left:0;overflow:visible;pointer-events:none}
+  .thread{stroke:var(--thread);stroke-width:1.6;fill:none;opacity:.7;transition:.2s}
+  .thread.green{stroke:var(--thread2)}
+  .thread.media{stroke:var(--media);stroke-dasharray:2 5}
+  .thread.dashed{stroke-dasharray:6 5;opacity:.5}
+  .thread.hot{stroke-width:2.8;opacity:1;filter:drop-shadow(0 0 4px rgba(192,57,43,.6))}
+  .thread.dim{opacity:.1}
+  .thlabel{font-family:'JetBrains Mono',monospace;font-size:10px;fill:var(--ink);
+    paint-order:stroke;stroke:var(--felt);stroke-width:4px;stroke-linejoin:round;transition:.2s}
+  .thlabel.hot{fill:#fff} .thlabel.dim{opacity:.12}
+
+  /* ---------- Header ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;gap:16px;
+    padding:11px 20px;background:linear-gradient(180deg,rgba(16,12,9,.97),rgba(16,12,9,.7));
+    backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.07)
+  }
+  header h1{font-family:'Special Elite',monospace;font-size:18px;color:var(--ink);letter-spacing:.04em;display:flex;align-items:center;gap:10px;white-space:nowrap}
+  header h1 .badge{font-size:9px;background:var(--thread);color:#fff;padding:2px 7px;border-radius:3px;font-family:'JetBrains Mono';letter-spacing:.05em;transform:rotate(-3deg)}
+  .sub{font-size:11px;color:var(--dim);font-family:'JetBrains Mono',monospace;white-space:nowrap}
+  .legend{display:flex;gap:13px;margin-left:auto;flex-wrap:wrap}
+  .legend .li{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--dim);white-space:nowrap}
+  .legend .sw{width:14px;height:3px;border-radius:2px}
+  .legend .dotc{width:10px;height:10px;border-radius:50%}
+  .hint{font-size:10px;color:var(--dim);font-family:'JetBrains Mono',monospace;opacity:.7}
+
+  /* ---------- Group zones ---------- */
+  .zone{position:absolute;border:1.5px dashed rgba(212,180,131,.35);border-radius:18px;pointer-events:none}
+  .zone .zlab{position:absolute;top:-11px;left:18px;background:var(--felt);padding:1px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--pin);text-transform:uppercase}
+
+  /* ---------- Cards (sticky notes) ---------- */
+  .card{
+    position:absolute;transform:translate(-50%,-50%) rotate(var(--rot,0deg));
+    width:182px;padding:13px 14px 12px;cursor:grab;user-select:none;
+    background:var(--paper);color:#1c1712;border-radius:3px;
+    box-shadow:0 10px 26px rgba(0,0,0,.5),0 2px 4px rgba(0,0,0,.3);
+    transition:box-shadow .2s,transform .08s;
+    font-family:'Inter',sans-serif;
+  }
+  .card::after{ /* tape */
+    content:"";position:absolute;top:-9px;left:50%;transform:translateX(-50%) rotate(-2deg);
+    width:54px;height:18px;background:rgba(220,210,180,.55);
+    box-shadow:0 1px 2px rgba(0,0,0,.2);border-left:1px dashed rgba(0,0,0,.06);border-right:1px dashed rgba(0,0,0,.06)
+  }
+  .card.proj{background:var(--paper2);--rot:1deg}
+  .card.media-c{background:#e4dcc6}
+  .card:active{cursor:grabbing}
+  .card:hover{box-shadow:0 16px 40px rgba(0,0,0,.65),0 0 0 1px rgba(212,180,131,.4)}
+  .card.sel{box-shadow:0 0 0 2px var(--pin),0 18px 44px rgba(0,0,0,.7)}
+  .card.faded{opacity:.28;filter:grayscale(.4)}
+  .card .pin{position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:13px;height:13px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #ff8a7a, var(--thread));box-shadow:0 2px 4px rgba(0,0,0,.5);z-index:2}
+  .card.proj .pin{background:radial-gradient(circle at 35% 30%, #ffd98a, #c8901f)}
+  .card .ph{ /* polaroid photo */
+    width:46px;height:46px;border-radius:2px;background:#cdbfa6 center/cover;
+    display:grid;place-items:center;font-family:'Special Elite';font-size:21px;color:#5a4a32;
+    border:3px solid #fff;box-shadow:0 3px 7px rgba(0,0,0,.3);transform:rotate(-3deg);flex:none
+  }
+  .card .top{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+  .card .nm{font-size:13px;font-weight:800;line-height:1.15;color:#1c1712}
+  .card .rl{font-size:10px;color:#6b5d48;line-height:1.25;margin-top:3px;font-weight:600}
+  .card .hd{font-size:9px;color:#8a7c64;font-family:'JetBrains Mono',monospace;margin-top:3px}
+  .card .conf{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-family:'JetBrains Mono';font-weight:700;
+    padding:2px 7px;border-radius:20px;margin-top:2px}
+  .conf.hi{background:rgba(46,160,100,.18);color:#1f7a4d} 
+  .conf.md{background:rgba(200,144,31,.2);color:#946012}
+  .conf.lo{background:rgba(200,60,43,.16);color:#a8331f}
+  .card .stamp{position:absolute;bottom:8px;right:10px;font-family:'Special Elite';font-size:9px;
+    letter-spacing:.04em;padding:2px 6px;border:1.5px solid;border-radius:3px;transform:rotate(-7deg);opacity:.8}
+  .stamp.dead{color:#a8331f;border-color:#a8331f}
+  .stamp.ok{color:#1f7a4d;border-color:#1f7a4d}
+  .stamp.q{color:#946012;border-color:#946012}
+
+  /* ---------- Detail panel ---------- */
+  #panel{position:fixed;top:0;right:0;bottom:0;width:438px;max-width:93vw;z-index:50;
+    background:#15100c;border-left:1px solid rgba(212,180,131,.25);
+    transform:translateX(106%);transition:transform .34s cubic-bezier(.16,1,.3,1);overflow-y:auto;
+    box-shadow:-22px 0 60px rgba(0,0,0,.6)}
+  #panel.open{transform:translateX(0)}
+  .pclose{position:absolute;top:14px;right:16px;width:30px;height:30px;border-radius:6px;border:1px solid rgba(212,180,131,.3);
+    background:#221a13;color:var(--ink);font-size:17px;cursor:pointer;display:grid;place-items:center;z-index:2}
+  .pclose:hover{background:#2e231a}
+  .phead{padding:26px 24px 18px;border-bottom:1px solid rgba(212,180,131,.18);position:relative}
+  .phead .ph{width:58px;height:58px;font-size:26px;margin-bottom:13px}
+  .phead .nm{font-family:'Special Elite';font-size:21px;color:var(--ink);line-height:1.1}
+  .phead .rl{font-size:12px;color:var(--pin);margin-top:6px;font-weight:600}
+  .phead .hd{font-size:11px;color:var(--dim);font-family:'JetBrains Mono';margin-top:5px}
+  .phead .conf{margin-top:11px}
+  .pbody{padding:18px 24px 60px}
+  .pblock{margin-bottom:20px}
+  .pblock h3{font-family:'JetBrains Mono';font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--pin);margin-bottom:9px}
+  .pblock p{font-size:12.5px;line-height:1.55;color:#d8d0c2}
+  .fact{display:flex;gap:9px;padding:9px 11px;border-radius:7px;margin-bottom:7px;font-size:12px;line-height:1.45;color:#e6ded0}
+  .fact .ic{flex:none;font-size:13px;line-height:1.4}
+  .fact.ok{background:rgba(46,160,100,.1);border-left:3px solid #3ddc97}
+  .fact.self{background:rgba(200,144,31,.1);border-left:3px solid var(--md)}
+  .fact.dead{background:rgba(200,60,43,.1);border-left:3px solid var(--lo)}
+  .fact.media{background:rgba(183,148,246,.1);border-left:3px solid var(--media)}
+  .fact .lbl{display:block;font-family:'JetBrains Mono';font-size:9px;font-weight:700;letter-spacing:.04em;
+    text-transform:uppercase;margin-bottom:3px}
+  .fact.ok .lbl{color:#3ddc97}.fact.self .lbl{color:var(--md)}.fact.dead .lbl{color:var(--lo)}.fact.media .lbl{color:var(--media)}
+  .src{font-size:10px;color:var(--dim);font-family:'JetBrains Mono';margin-top:4px;word-break:break-all}
+  .src a{color:#7fa8d8;text-decoration:none}.src a:hover{text-decoration:underline}
+  .conns{display:flex;flex-direction:column;gap:6px}
+  .conn{font-size:11.5px;color:#e6ded0;padding:8px 11px;background:#221a13;border-radius:7px;
+    border:1px solid rgba(212,180,131,.18);cursor:pointer;transition:.15s;line-height:1.35}
+  .conn:hover{border-color:var(--pin);background:#2c2218}
+  .conn .via{color:var(--dim);font-family:'JetBrains Mono';font-size:9.5px;display:block;margin-top:2px}
+  .conn .cf{float:right;font-family:'JetBrains Mono';font-size:9px;font-weight:700}
+  .cf.hi{color:#3ddc97}.cf.md{color:var(--md)}.cf.lo{color:var(--lo)}
+
+  /* ---------- Controls + timeline ---------- */
+  .ctrls{position:fixed;bottom:18px;left:18px;z-index:40;display:flex;gap:8px}
+  .ctrls button{width:38px;height:38px;border-radius:8px;border:1px solid rgba(212,180,131,.3);background:#221a13;color:var(--ink);
+    font-size:17px;cursor:pointer;display:grid;place-items:center;box-shadow:0 4px 12px rgba(0,0,0,.5)}
+  .ctrls button:hover{background:#2e231a}
+  .ctrls .lbl{width:auto;padding:0 13px;font-size:11px;font-family:'JetBrains Mono';gap:6px}
+
+  #tl{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:40;display:flex;align-items:center;
+    background:#221a13;border:1px solid rgba(212,180,131,.25);border-radius:10px;padding:7px 11px;
+    box-shadow:0 4px 12px rgba(0,0,0,.5);max-width:60vw;overflow-x:auto}
+  #tl .tstep{display:flex;align-items:center;flex:none}
+  #tl .td{width:8px;height:8px;border-radius:50%;background:#6b5d48;flex:none}
+  #tl .td.v{background:#3ddc97}#tl .td.s{background:var(--md)}#tl .td.m{background:var(--media)}
+  #tl .seg{width:22px;height:2px;background:#3a2e22}
+  #tl .tlab{font-size:8.5px;font-family:'JetBrains Mono';color:var(--dim);white-space:nowrap;padding:0 5px}
+  #tl .tstep:hover .tlab{color:var(--ink)}
+
+  @media (max-width:760px){.legend,#tl{display:none}.card{width:160px}header h1{font-size:15px}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🕵 Доска расследования <span class="badge">РЕВИЗИЯ v2 · 27.06.26</span></h1>
+  <span class="sub">только проверяемые факты · с источниками</span>
+  <div class="legend">
+    <div class="li"><span class="dotc" style="background:#3ddc97"></span>Высокая</div>
+    <div class="li"><span class="dotc" style="background:var(--md)"></span>Средняя</div>
+    <div class="li"><span class="dotc" style="background:var(--lo)"></span>Низкая / не подтв.</div>
+    <div class="li"><span class="sw" style="background:var(--thread2)"></span>факт ✓</div>
+    <div class="li"><span class="sw" style="background:var(--thread)"></span>связь</div>
+    <div class="li"><span class="sw" style="background:var(--media)"></span>медиа</div>
+  </div>
+  <span class="hint">клик — досье · тащи карточки · колесо — зум</span>
+</header>
+
+<div id="stage">
+  <div id="world">
+    <svg class="threads" id="threads"></svg>
+    <!-- zones + cards injected -->
+  </div>
+</div>
+
+<div class="ctrls">
+  <button id="zin">+</button>
+  <button id="zout">−</button>
+  <button id="reset" class="lbl">⟳ сброс</button>
+</div>
+
+<div id="tl"></div>
+
+<aside id="panel">
+  <button class="pclose" id="pclose">×</button>
+  <div class="phead" id="phead"></div>
+  <div class="pbody" id="pbody"></div>
+</aside>
+
+<script>
+/* ============ ZONES ============ */
+const ZONES=[
+  {x:300,y:430,w:520,h:360,label:'Academix Hub'},
+  {x:870,y:250,w:560,h:330,label:'Larp Factory · Reko AI / NeuHarmony'},
+  {x:560,y:-70,w:430,h:300,label:'TabAI · Игорь Blink'},
+  {x:1050,y:640,w:430,h:300,label:'Eurasian Hub · Investly'},
+  {x:120,y:760,w:380,h:260,label:'Не подтверждено / отдельно'},
+  {x:120,y:120,w:360,h:240,label:'Ложные совпадения'}
+];
+
+/* ============ NODES ============ */
+const N={
+  magzhan:{t:'p',conf:'md',name:'Магжан Аманжан',hd:'@magzhanchick',ph:'М',rot:-2,x:430,y:520,
+    role:'Основатель Academix Hub · alumnus ISSAI SRP 2025',
+    stamp:['ok','ОСНОВАТЕЛЬ'],
+    facts:[
+      ['ok','Подтверждено','Сооснователь Academix Hub. ISSAI Назарбаев Университета независимо называет его основателем и alumnus SRP 2025.','ISSAI NU · The Steppe','issai.nu.edu.kz/2026/01/26/...'],
+      ['self','Частично','Маппинг ника @magzhanchick → «Магжан Аманжан» подтверждается косвенно (имя в СМИ), напрямую через аккаунт не верифицирован.','—','']
+    ],
+    note:'Один из двух «центральных» героев, с которых ты начинал. Связь с Midas/Prepify — НЕ подтверждена, удалена.'},
+
+  almyrza:{t:'p',conf:'md',name:'Алмырза Мухамеджанов',hd:'@mrzaaaw',ph:'А',rot:2,x:430,y:700,
+    role:'Сооснователь Academix Hub',
+    facts:[
+      ['ok','Подтверждено','The Steppe прямо: «основатели Academix Hub, Магжан Аманжан и Альмырза Мухамеджанов».','The Steppe','the-steppe.com/steppe-youth/...'],
+      ['self','Частично','Маппинг ника @mrzaaaw → личность напрямую не подтверждён (Низкая).','—','']
+    ],
+    note:'Привязка к Midas Clothes и Prepify из прошлой версии — УДАЛЕНА (нет доказательств).'},
+
+  academix:{t:'proj',conf:'md',name:'Academix Hub',hd:'academixhub.co',ph:'A',rot:-1,x:660,y:610,
+    role:'«Экосистема» для школьников: олимпиады, конкурсы, IRC, GenerativeX',
+    stamp:['ok','ЖИВ'],
+    facts:[
+      ['ok','Подтверждено','Существование, основатели и партнёрство с ISSAI NU. GenerativeX 2026 (ISSAI × Academix).','ISSAI NU · The Steppe','issai.nu.edu.kz'],
+      ['self','Со слов','«2000+ студентов», «жюри Камилы в IRC» — самоотчёт. В The Steppe фигурирует «более 1000 участников».','The Steppe','the-steppe.com'],
+      ['self','Со слов','Выручки нет, монетизация (подписка) — в планах.','—','']
+    ],
+    note:'В жюри IRC заявлена Камила (NeuHarmony) — это и есть мостик между двумя кластерами, но независимо не подтверждён.'},
+
+  kamila:{t:'p',conf:'hi',name:'Камиля Мухаметкалиева',hd:'@kamilyamukh',ph:'К',rot:1,x:980,y:330,
+    role:'Larp Factory (Reko AI) · основатель NeuHarmony',
+    stamp:['ok','$10k ✓'],
+    facts:[
+      ['ok','Подтверждено','Команда Larp Factory выиграла Alem Plus Hackathon 2026 с Reko AI — $10 000. Подтверждает САМ Astana Hub.','Astana Hub','astanahub.com/ru/article/ai-startapy-...'],
+      ['self','Со слов','NeuHarmony: ~$1,5 тыс. «на идею», статья в Curieux, партнёрства Ayala/Мейирим, результаты «к 4-й сессии».','er10.kz','er10.kz/.../neuharmony-...'],
+      ['media','Реклама','Интервью ER10 о NeuHarmony помечено «На правах рекламы». Статья digitalbusiness.kz 22.12.25 — рубрика «Личный опыт».','er10.kz · digitalbusiness.kz','']
+    ],
+    note:'Сильнейший ПОДТВЕРЖДЁННЫЙ факт всей сети — это её победа на хакатоне. NeuHarmony держится на PR.'},
+
+  reko:{t:'proj',conf:'hi',name:'Reko AI',hd:'команда Larp Factory',ph:'R',rot:-2,x:1230,y:300,
+    role:'AI-формирование ЭСФ из выписок и PDF',
+    stamp:['ok','ПРИЗ ✓'],
+    facts:[
+      ['ok','Подтверждено','Победа на Alem Plus Hackathon 2026 (финал 22.05.2026, alem.ai; пул «до $18 000»; орг. Astana Hub + Фонд цифр. инициатив ЕАБР).','Astana Hub · kaktus.media','astanahub.com'],
+      ['self','Со слов','Первый платящий клиент — Grand Balance, 29 900 ₸/мес; закрытая бета. Это самоотчёт команды.','digitalbusiness.kz','digitalbusiness.kz/2026-05-27/...']
+    ]},
+
+  neuharmony:{t:'proj',conf:'md',name:'NeuHarmony',hd:'муз. терапия · РАС',ph:'N',rot:2,x:1230,y:450,
+    role:'Закрытая B2B-платформа музыкотерапии для соццентров',
+    stamp:['q','PR'],
+    facts:[
+      ['media','Реклама','Интервью ER10 — «На правах рекламы». Независимого подтверждения выручки/результатов нет.','er10.kz','er10.kz'],
+      ['self','Со слов','Пилот в центрах Ayala и Мейирим, диагностика + 6-недельный план — самоотчёт.','digitalbusiness.kz','']
+    ]},
+
+  igor:{t:'p',conf:'hi',name:'Игорь Мартынюк «Blink»',hd:'@igor_blinkk',ph:'И',rot:-2,x:680,y:80,
+    role:'Основатель TabAI · победитель nFactorial 2025 · амбассадор Cursor',
+    stamp:['ok','nFactorial ✓'],
+    facts:[
+      ['ok','Подтверждено','TabAI существует; победа nFactorial; официальный амбассадор Cursor (заметили в X). Грант Google Gemini $25 тыс. (его слова).','digitalbusiness.kz','digitalbusiness.kz/2026-06-07/...'],
+      ['dead','Расхождение','«Около 20 тыс. пользователей» (пресс-релиз Минпросвещения РК) против Chrome Web Store: 3 000 пользователей, 4.75 (75 оценок).','chrome-stats.com','chrome-stats.com/d/fiogaki...'],
+      ['dead','Расхождение','Проверяемая сумма привлечённого — $35 000 (в т.ч. $30k от Базылбекова), а НЕ «$300k».','digitalbusiness.kz','digitalbusiness.kz/2026-06-07/...']
+    ],
+    note:'Кейс реальный, но цифры завышены. BirdTON «12M+ users» — самоотчёт. Privacy policy у TabAI есть.'},
+
+  tabai:{t:'proj',conf:'hi',name:'TabAI',hd:'tabai.dev · @tabaiapp',ph:'T',rot:1,x:680,y:-30,
+    role:'AI task-manager · расширение Chrome',
+    stamp:['q','3000 юзеров'],
+    facts:[
+      ['ok','Факт стора','Live, Featured. Пользователей 3 000, рейтинг 4.75 (75 оценок), версия 3.5.5.1, обновлено 14.06.2026, создано 11.06.2025. Privacy policy: tabai.dev/policy.','Chrome Web Store · chrome-stats','chrome-stats.com/d/fiogaki...'],
+      ['self','Расхождение','Маркетинг «10 000+ / 20 000» пользователей не сходится с 3 000 в сторе. В отзывах — «sign in is broken».','chrome-stats.com','']
+    ]},
+
+  anuar:{t:'p',conf:'hi',name:'Ануар Жамбакин',hd:'@anuar_zhambakin02',ph:'Ан',rot:2,x:1150,y:720,
+    role:'Сооснователь и CEO Investly Hub (РФМШ, 15 лет)',
+    stamp:['ok','СДЕЛКА ✓'],
+    facts:[
+      ['ok','Подтверждено','Investly куплен Eurasian Hub. digitalbusiness.kz дословно: «Сумма сделки хаба с Investly — $50 тыс.». Остался CEO.','digitalbusiness.kz','digitalbusiness.kz/2025-08-29/...'],
+      ['self','Со слов','Сообщество «5 000 человек», призовой фонд «11 млн тенге», бесплатный инкубатор — самоотчёт + СМИ.','investlyhub.io','investlyhub.io']
+    ]},
+
+  eurasian:{t:'p',conf:'hi',name:'Нурдаулет Базылбеков',hd:'@012.bn · Eurasian Hub',ph:'E',rot:-1,x:1370,y:780,
+    role:'Основатель Eurasian Hub + Eurasian Hub Ventures (Лондон)',
+    stamp:['ok','ИНВЕСТОР'],
+    facts:[
+      ['ok','Подтверждено','Купил Investly ($50k). Инвестировал $30k в TabAI. Venture-клуб, чеки до $100 тыс.','digitalbusiness.kz','digitalbusiness.kz/2025-04-02/...'],
+      ['self','Со слов','Ex-London Stock Exchange, опыт в фонде «с активами $120 млрд» — собственное утверждение в интервью.','digitalbusiness.kz','']
+    ],
+    note:'«Выпускной» путь сети к реальному капиталу. Связывает Жамбакина и Мартынюка.'},
+
+  digbiz:{t:'media-c',conf:'hi',name:'digitalbusiness.kz',hd:'ТОО «Digital Business Media»',ph:'D',rot:3,x:680,y:1080,
+    role:'Главный «движок» освещения сети',
+    stamp:['q','PRICE'],
+    facts:[
+      ['media','Прайс (дословно)','«500 000 KZT — за публикацию без пометки «Партнерский материал»… закрепление на главном экране 3 дня». +60 000 ₸ — Instagram и Telegram. 450 000 ₸ — с пометкой «Партнерский материал».','digitalbusiness.kz','digitalbusiness.kz/stoimost-integraczij/'],
+      ['ok','Юрлицо','ТОО «Digital Business Media», БИН 220540023091, Алматы, Байзакова 280.','реестр','digitalbusiness.kz/o-proekte/'],
+      ['dead','Недостаточно данных','Имя «Виталий Волянюк» как CEO на странице /o-proekte напрямую не зафиксировано в этой проверке.','—','']
+    ],
+    note:'Объясняет, почему о фигурантах пишут как об «инноваторах»: часть публикаций может быть оплачена без пометки.'},
+
+  astanahub:{t:'proj',conf:'hi',name:'Astana Hub',hd:'программы и призы',ph:'AH',rot:-2,x:980,y:120,
+    role:'Источник большинства программ, грантов, хакатонов',
+    stamp:['ok','ЯКОРЬ'],
+    facts:[
+      ['ok','Подтверждено','Организатор Alem Plus Hackathon 2026, где победил Reko AI. CEO — Магжан МАДИЕВ (отдельная старшая фигура, не тин-фаундер).','Astana Hub · Crunchbase','astanahub.com'],
+      ['ok','Роль','Большинство ПРОВЕРЯЕМЫХ достижений сети подтверждаются именно через Astana Hub — «якорь правды».','—','']
+    ]},
+
+  tair:{t:'p',conf:'md',name:'Таир Калдыбаев',hd:'@tairqaldy · @qaldy_ai',ph:'Т',rot:1,x:300,y:870,
+    role:'Самоназвание «Software Engineer & AI Expert» · Quantum STEM School',
+    stamp:['q','НЕТ СВЯЗЕЙ'],
+    facts:[
+      ['dead','Не подтверждено','НИ ОДНОЙ подтверждённой связи с другими лицами сети не найдено. В материалах Academix/Investly/Eurasian не упоминается.','целевой поиск','—'],
+      ['ok','Подтверждено','Qaldy AI — реальное ТОО (БИН 241140033566, рег. 26.11.2024, Астана). Руководитель — Тимур Калдыбаев (семейный бизнес, настольная игра «ВЛАСТЬ»).','реестр ba.prg.kz','ba.prg.kz'],
+      ['dead','Не найдено','Живого продукта Qaldy AI / сайта / privacy policy НЕТ. Профиль на Astana Hub пустой. Обучение в Fontys — только мета-тег, не подтверждено.','Казправда','kazpravda.kz/n/shkolnik-...']
+    ],
+    note:'Новый фигурант. По итогам проверки — отдельно стоящий, в сеть не входит. Edom.kz (ЖКХ) — призёр городской олимпиады, продукт «в разработке».'},
+
+  harmonic:{t:'proj',conf:'hi',name:'harmonic.ai',hd:'ЛОЖНОЕ СОВПАДЕНИЕ',ph:'H',rot:-3,x:300,y:230,
+    role:'Venture-data компания (SF/NYC) — НЕ часть сети',
+    stamp:['ok','НЕ СВЯЗАНО'],
+    facts:[
+      ['ok','Опровергнуто','Независимая компания США, осн. 2020 (Bryan Casey, Ajay Sohmshetty; CEO Max Ruderman). Клиенты Floodgate, Brex, Notion, Carta, a16z.','Crunchbase · Preqin','crunchbase.com/organization/harmonic-ai'],
+      ['ok','Финансирование','$23M Series A (Preqin, Sozo Ventures) / $30M суммарно (PitchBook). Совпадение по названию — не более.','Preqin · PitchBook','']
+    ]},
+
+  lovable:{t:'proj',conf:'lo',name:'warm-website-smile',hd:'*.lovable.app',ph:'L',rot:2,x:430,y:300,
+    role:'Вероятно, заброшенный прототип — НЕ узел',
+    stamp:['q','ПУСТО'],
+    facts:[
+      ['dead','Недостаточно данных','Прямой доступ не удался. По характеру доменов lovable.app — заброшенный прототип. Связь с сетью не подтверждена.','—','']
+    ]}
+};
+
+/* ============ EDGES ============ */
+const E=[
+  ['magzhan','almyrza','сооснователи Academix','green','hi'],
+  ['magzhan','academix','основатель','green','hi'],
+  ['almyrza','academix','основатель','green','hi'],
+  ['magzhan','astanahub','alumnus / партнёр ISSAI','green','hi'],
+  ['academix','kamila','Камила в жюри IRC (со слов)','dashed','lo'],
+  ['kamila','reko','команда Larp Factory · хакатон 05.2026','green','hi'],
+  ['kamila','neuharmony','основатель','green','md'],
+  ['reko','astanahub','победа $10k подтв. организатором','green','hi'],
+  ['igor','tabai','основатель','green','hi'],
+  ['igor','astanahub','экосистема / nFactorial','','md'],
+  ['igor','eurasian','инвестиция $30k в TabAI','green','hi'],
+  ['anuar','eurasian','продажа Investly $50k · 08.2025','green','hi'],
+  ['eurasian','astanahub','экосистемная связь','','md'],
+  ['kamila','digbiz','освещение (личный опыт)','media','hi'],
+  ['neuharmony','digbiz','PR-материал','media','hi'],
+  ['anuar','digbiz','освещение','media','hi'],
+  ['igor','digbiz','освещение','media','hi'],
+  ['academix','digbiz','освещение','media','md']
+];
+
+/* ============ RENDER ============ */
+const world=document.getElementById('world');
+const stage=document.getElementById('stage');
+const svg=document.getElementById('threads');
+const cardEls={};
+
+// zones
+ZONES.forEach(z=>{
+  const d=document.createElement('div');
+  d.className='zone';
+  d.style.cssText=`left:${z.x}px;top:${z.y}px;width:${z.w}px;height:${z.h}px`;
+  d.innerHTML=`<span class="zlab">${z.label}</span>`;
+  world.appendChild(d);
+});
+
+function cardHTML(id,n){
+  const cls=n.t==='proj'?'proj':n.t==='media-c'?'media-c':'';
+  const stamp=n.stamp?`<div class="stamp ${n.stamp[0]}">${n.stamp[1]}</div>`:'';
+  const confTxt={hi:'Высокая',md:'Средняя',lo:'Низкая'}[n.conf];
+  return `<div class="card ${cls}" data-id="${id}" style="left:${n.x}px;top:${n.y}px;--rot:${n.rot||0}deg">
+    <div class="pin"></div>
+    <div class="top">
+      <div class="ph">${n.ph}</div>
+      <div><div class="nm">${n.name}</div><div class="rl">${n.role}</div><div class="hd">${n.hd}</div></div>
+    </div>
+    <span class="conf ${n.conf}">● ${confTxt}</span>
+    ${stamp}
+  </div>`;
+}
+Object.entries(N).forEach(([id,n])=>world.insertAdjacentHTML('beforeend',cardHTML(id,n)));
+world.querySelectorAll('.card').forEach(el=>cardEls[el.dataset.id]=el);
+
+// threads
+const thr=[];
+E.forEach(e=>{
+  if(!N[e[0]]||!N[e[1]])return;
+  const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('class','thread '+(e[3]||''));
+  svg.appendChild(path);
+  let label=null;
+  if(e[2]){
+    label=document.createElementNS('http://www.w3.org/2000/svg','text');
+    label.setAttribute('class','thlabel');label.setAttribute('text-anchor','middle');
+    label.textContent=e[2];svg.appendChild(label);
+  }
+  thr.push({a:e[0],b:e[1],path,label,conf:e[4]});
+});
+function draw(){
+  thr.forEach(t=>{
+    const A=N[t.a],B=N[t.b];
+    const mx=(A.x+B.x)/2,my=(A.y+B.y)/2,dx=B.x-A.x,dy=B.y-A.y;
+    const cx=mx-dy*0.08,cy=my+dx*0.08;
+    t.path.setAttribute('d',`M${A.x},${A.y} Q${cx},${cy} ${B.x},${B.y}`);
+    if(t.label){
+      const lx=0.25*A.x+0.5*cx+0.25*B.x, ly=0.25*A.y+0.5*cy+0.25*B.y;
+      t.label.setAttribute('x',lx);t.label.setAttribute('y',ly);
+    }
+  });
+}
+draw();
+
+/* ============ PAN/ZOOM ============ */
+let scale=0.6,tx=60,ty=60;
+const applyT=()=>world.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;
+applyT();
+let panning=false,sx,sy,stx,sty;
+stage.addEventListener('mousedown',e=>{if(e.target.closest('.card'))return;panning=true;stage.classList.add('panning');sx=e.clientX;sy=e.clientY;stx=tx;sty=ty;});
+window.addEventListener('mousemove',e=>{if(!panning)return;tx=stx+(e.clientX-sx);ty=sty+(e.clientY-sy);applyT();});
+window.addEventListener('mouseup',()=>{panning=false;stage.classList.remove('panning');});
+stage.addEventListener('wheel',e=>{e.preventDefault();const r=stage.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;const wx=(mx-tx)/scale,wy=(my-ty)/scale;const ns=Math.min(2.2,Math.max(.26,scale*(e.deltaY<0?1.12:.89)));tx=mx-wx*ns;ty=my-wy*ns;scale=ns;applyT();},{passive:false});
+document.getElementById('zin').onclick=()=>{scale=Math.min(2.2,scale*1.15);applyT();};
+document.getElementById('zout').onclick=()=>{scale=Math.max(.26,scale*.87);applyT();};
+document.getElementById('reset').onclick=()=>{scale=.6;tx=60;ty=60;applyT();clearSel();};
+
+/* ============ DRAG ============ */
+let drag=null;
+function bindDrag(el){
+  el.addEventListener('mousedown',e=>{e.stopPropagation();drag={el,id:el.dataset.id,sx:e.clientX,sy:e.clientY,ox:N[el.dataset.id].x,oy:N[el.dataset.id].y,moved:false};});
+  el.addEventListener('touchstart',e=>{const t=e.touches[0];drag={el,id:el.dataset.id,sx:t.clientX,sy:t.clientY,ox:N[el.dataset.id].x,oy:N[el.dataset.id].y,moved:false};},{passive:true});
+}
+world.querySelectorAll('.card').forEach(bindDrag);
+function moveDrag(cx,cy){
+  const dx=(cx-drag.sx)/scale,dy=(cy-drag.sy)/scale;
+  if(Math.abs(dx)>2||Math.abs(dy)>2)drag.moved=true;
+  N[drag.id].x=drag.ox+dx;N[drag.id].y=drag.oy+dy;
+  drag.el.style.left=N[drag.id].x+'px';drag.el.style.top=N[drag.id].y+'px';draw();
+}
+window.addEventListener('mousemove',e=>{if(drag)moveDrag(e.clientX,e.clientY);});
+window.addEventListener('touchmove',e=>{if(drag){const t=e.touches[0];moveDrag(t.clientX,t.clientY);}},{passive:true});
+window.addEventListener('mouseup',()=>{if(drag&&!drag.moved)openPanel(drag.id);drag=null;});
+window.addEventListener('touchend',()=>{if(drag&&!drag.moved)openPanel(drag.id);drag=null;});
+
+/* ============ HIGHLIGHT + PANEL ============ */
+function rel(id){const s=new Set([id]);thr.forEach(t=>{if(t.a===id)s.add(t.b);if(t.b===id)s.add(t.a);});return s;}
+function highlight(id){
+  const r=rel(id);
+  Object.entries(cardEls).forEach(([k,el])=>{el.classList.toggle('faded',!r.has(k));el.classList.toggle('sel',k===id);});
+  thr.forEach(t=>{const on=(t.a===id||t.b===id);t.path.classList.toggle('hot',on);t.path.classList.toggle('dim',!on);if(t.label){t.label.classList.toggle('hot',on);t.label.classList.toggle('dim',!on);}});
+}
+function clearSel(){Object.values(cardEls).forEach(el=>el.classList.remove('faded','sel'));thr.forEach(t=>{t.path.classList.remove('hot','dim');if(t.label)t.label.classList.remove('hot','dim');});panel.classList.remove('open');}
+
+const panel=document.getElementById('panel');
+function openPanel(id){
+  const n=N[id];highlight(id);
+  const confTxt={hi:'Высокая',md:'Средняя',lo:'Низкая'}[n.conf];
+  const facts=(n.facts||[]).map(f=>{
+    const icon={ok:'✓',self:'!',dead:'✕',media:'₸'}[f[0]];
+    const src=f[3]?`<div class="src">📎 ${f[3]}${f[4]?` · <a href="#" onclick="return false">${f[4]}</a>`:''}</div>`:'';
+    return `<div class="fact ${f[0]}"><div class="ic">${icon}</div><div><span class="lbl">${f[1]}</span>${f[2]}${src}</div></div>`;
+  }).join('');
+  const cons=[];
+  thr.forEach(t=>{let o=null,via=t.label?t.label.textContent:'';if(t.a===id)o=t.b;else if(t.b===id)o=t.a;
+    if(o){const cf={hi:'Выс',md:'Сред',lo:'Низ'}[t.conf];cons.push(`<div class="conn" onclick="openPanel('${o}')"><span class="cf ${t.conf}">${cf}</span>${N[o].name}<span class="via">${via||'связь'}</span></div>`);}});
+  document.getElementById('phead').innerHTML=`<div class="ph">${n.ph}</div><div class="nm">${n.name}</div><div class="rl">${n.role}</div><div class="hd">${n.hd}</div><span class="conf ${n.conf}">● Достоверность: ${confTxt}</span>`;
+  document.getElementById('pbody').innerHTML=`
+    ${n.note?`<div class="pblock"><p style="color:#b8ad9a;font-style:italic">${n.note}</p></div>`:''}
+    ${facts?`<div class="pblock"><h3>Заявлено vs факты · источники</h3>${facts}</div>`:''}
+    ${cons.length?`<div class="pblock"><h3>Связи (${cons.length})</h3><div class="conns">${cons.join('')}</div></div>`:''}
+    <div class="pblock"><h3>Проверено</h3><p style="font-family:'JetBrains Mono';font-size:11px;color:var(--dim)">27 июня 2026</p></div>`;
+  panel.classList.add('open');
+}
+document.getElementById('pclose').onclick=clearSel;
+stage.addEventListener('mousedown',e=>{if(!e.target.closest('.card'))clearSel();});
+world.querySelectorAll('.card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{if(panel.classList.contains('open'))return;thr.forEach(t=>{const on=(t.a===el.dataset.id||t.b===el.dataset.id);t.path.classList.toggle('hot',on);if(t.label)t.label.classList.toggle('hot',on);});});
+  el.addEventListener('mouseleave',()=>{if(panel.classList.contains('open'))return;thr.forEach(t=>{t.path.classList.remove('hot');if(t.label)t.label.classList.remove('hot');});});
+});
+
+/* ============ TIMELINE ============ */
+const TL=[
+  ['26.11.24','рег. ТОО Qaldy AI','s'],
+  ['11.06.25','создан TabAI (Chrome)','s'],
+  ['21.07.25','Investly: Жамбакин','m'],
+  ['19.08.25','ER10: NeuHarmony (реклама)','m'],
+  ['29.08.25','Investly→Eurasian $50k','v'],
+  ['22.12.25','digbiz: Камила','m'],
+  ['26.01.26','GenerativeX (ISSAI×Academix)','v'],
+  ['22.05.26','Alem Plus: Reko AI $10k','v'],
+  ['07.06.26','Мартынюк: $35k, Cursor','v'],
+  ['14.06.26','TabAI обновлён','s']
+];
+const tl=document.getElementById('tl');
+TL.forEach((t,i)=>{tl.insertAdjacentHTML('beforeend',`<div class="tstep"><div class="td ${t[2]}"></div><span class="tlab">${t[0]} · ${t[1]}</span></div>`+(i<TL.length-1?'<div class="seg"></div>':''));});
+</script>
+</body>
+</html>
