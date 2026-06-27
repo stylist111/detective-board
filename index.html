@@ -170,7 +170,7 @@
 <body>
 
 <header>
-  <h1>🕵 Доска расследования <span class="badge">РЕВИЗИЯ v4 · 27.06.26</span></h1>
+  <h1>🕵 Доска расследования <span class="badge">РЕВИЗИЯ v5 · 27.06.26</span></h1>
   <span class="sub">только проверяемые факты · с источниками</span>
   <div class="legend">
     <div class="li"><span class="dotc" style="background:#3ddc97"></span>Высокая</div>
@@ -276,12 +276,13 @@ const N={
 
   igor:{t:'p',conf:'hi',name:'Игорь Мартынюк «Blink»',hd:'@igor_blinkk · glourfish ✓',ph:'И',rot:-2,x:680,y:80,
     role:'17 y.o founder TabAI · nFactorial 2025 · @trycursor ambassador',
-    stamp:['q','$35K vs $300K'],
+    stamp:['q','«бросил школу»?'],
     facts:[
       ['ok','Подтверждено','TabAI существует; победа nFactorial; верифицированный аккаунт IG (галочка); официальный амбассадор Cursor ($29 млрд); грант Google; YC Startup School (полный грант, исключение по возрасту).','digitalbusiness.kz · osn.kz','digitalbusiness.kz/2026-06-07/...'],
       ['dead','РАЗГАДКА цифр','Апрель 2026: везде «$35 тыс. ангельских» (Минпросвещения, Kursiv, nFactorial). Май 2026: вдруг «$300 тыс.». По самому DB: «$250 тыс. как участник акселерационного трека FIR U» + a16z Scout + ангелы = $300K. Т.е. $300K ≠ инвестчек, а в основном место в акселераторе.','digitalbusiness.kz 12.05 vs 07.06','digitalbusiness.kz/2026-05-12/...'],
       ['dead','Расхождение','«~20 тыс. пользователей» (Минпросвещения, его сайт igorblink.xyz) против Chrome Web Store: 3 000 пользователей, 4.75 (75 оценок). Разрыв ~7x.','chrome-stats.com','chrome-stats.com/d/fiogaki...'],
-      ['self','Со слов','MRR ~$3 тыс.; «первые корпоративные клиенты»; BirdTON «12M+ users»; Traffy «$300k GMV» (это оборот рекламы, не его выручка).','digitalbusiness.kz · igorblink.xyz','']
+      ['self','Со слов','MRR ~$3 тыс.; «первые корпоративные клиенты»; BirdTON «12M+ users»; Traffy «$300k GMV» (это оборот рекламы, не его выручка); «CTO в компании, идущей к early AGI»; «signed first SAFEs».','digitalbusiness.kz · igorblink.xyz','igorblink.xyz'],
+      ['dead','Противоречие','На лендинге: «Dropped high-school» + «уехал из казахской деревни в SF». НО на фото (отмечен @igor_blinkk, 4 нед. назад) он на ПОСЛЕДНЕМ ЗВОНКЕ в Павлодаре — школьная форма, ленты «Выпускник». «Бросил школу» плохо вяжется с присутствием на собственном школьном выпускном месяц назад.','скриншот сторис','instagram.com/igor_blinkk']
     ],
     note:'Кейс реальный и сильный, но цифры подаются раздуто. Главный разрыв: «привлёк $300K» на деле = $35K ангелов (апрель) + $250K акселератор FIR U + Scout-чек (май). Одна история, цифры разнятся в ~10 раз в зависимости от месяца. Подписан на 23_gleb_.'},
 
@@ -353,14 +354,16 @@ const N={
       ['dead','Недостаточно данных','Прямой доступ не удался. По характеру доменов lovable.app — заброшенный прототип. Связь с сетью не подтверждена.','—','']
     ]},
 
-  midas:{t:'proj',conf:'md',name:'Midas Clothes',hd:'@midas.clothes1 · midasclothing.shop',ph:'$',rot:-2,x:160,y:480,
-    role:'Бренд одежды — заявлен Магжаном как его проект',
-    stamp:['dead','МЁРТВЫЙ САЙТ'],
+  midas:{t:'proj',conf:'hi',name:'Midas Clothes',hd:'@midas.clothes1 · midasclothing.shop',ph:'$',rot:-2,x:160,y:480,
+    role:'Shopify-магазин мерча для основателей стартапов — проект Магжана',
+    stamp:['ok','ЖИВОЙ Shopify'],
     facts:[
-      ['ok','Связь ПОДТВЕРЖДЕНА','Магжан в био Instagram прямо указывает «founder of … @midas.clothes1». Раньше связь была «не подтверждена» — теперь подтверждена самим фаундером.','скриншот IG @magzhanchick','instagram.com/magzhanchick'],
-      ['dead','Сайт','midasclothing.shop — нулевой след в поиске, не открывается. Нет privacy policy / terms / регистрации. По сути мёртвый/незапущенный магазин.','проверка домена','']
+      ['ok','Связь ПОДТВЕРЖДЕНА','Магжан в био Instagram: «founder of … @midas.clothes1».','скриншот IG @magzhanchick','instagram.com/magzhanchick'],
+      ['ok','ИСПРАВЛЕНО: сайт живой','Раньше я ошибочно считал его мёртвым — не мог загрузить. По факту это рабочий Shopify-магазин: товары с ценами (футболка Founders $25.97, худи «Single Until Series D» $46.50, коллекция Midas Greeks), корзина, checkout, копирайт 2026.','прямой осмотр midasclothing.shop','midasclothing.shop'],
+      ['ok','Privacy РАБОТАЕТ','В отличие от Prepify, тут Privacy Policy реально открывается (/policies/privacy-policy, стандарт Shopify).','прямой осмотр','midasclothing.shop/policies/privacy-policy'],
+      ['self','Не проверить','Есть ли реальные заказы/выручка — неизвестно (Shopify это не показывает). Технически продавать может; объёмы продаж не подтверждаются.','—','']
     ],
-    note:'Один из «трёх проектов» Магжана. Связь теперь железная (его собственное био), но сам продукт не работает — что и было твоей исходной гипотезой.'},
+    note:'Самый «настоящий» из трёх проектов Магжана: рабочий магазин с оплатой и privacy policy. Тематика — ирония про стартаперов («Single Until Series D»). Но что он реально что-то продаёт — не подтверждено.'},
 
   prepify:{t:'proj',conf:'hi',name:'Prepify',hd:'tryprepify.vercel.app · @prepify.prep',ph:'P',rot:2,x:160,y:660,
     role:'Подготовка к экзамену CSCA (для поступления в вузы Китая) — проект Магжана',
